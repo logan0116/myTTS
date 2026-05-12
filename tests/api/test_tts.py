@@ -1,87 +1,12 @@
-"""API tests for TTS endpoints."""
-
-import io
+"""API tests for TTS endpoints — using real backend routes."""
 
 import pytest
-from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
-
-from backend.api.tts import router as tts_router
-from backend.models.schemas import TTSRequest, TTSResponse
-
-
-def create_test_app(mock_engine, mock_audio_store):
-    """Build a FastAPI app wired to mocked engine and audio store."""
-    app = FastAPI()
-
-    async def get_engine(request: Request):
-        return mock_engine
-
-    async def get_store(request: Request):
-        return mock_audio_store
-
-    # Override the route with one that actually uses mocked deps
-    @app.post("/api/tts/text-to-speech", response_model=TTSResponse)
-    async def text_to_speech(req: TTSRequest, request: Request):
-        engine = request.app.state.engine
-        store = request.app.state.audio_store
-
-        # Gather audio chunks
-        chunks = list(engine.tts_zero_shot(
-            req.text,
-            "You are a helpful assistant.<|endofprompt|>希望你以后能做得更好。",
-            str(store.audio_dir / "default_prompt.wav"),
-            stream=req.stream,
-        ))
-
-        # Save audio
-        import numpy as np
-        import wave
-
-        audio = chunks[0]["tts_speech"]
-        arr = np.squeeze(np.asarray(audio))
-        duration = len(arr) / engine.sample_rate
-
-        audio_id = "tts_test_output.wav"
-        path = store.audio_dir / audio_id
-        arr_int16 = (arr / max(arr.max(), 1e-8) * 32767).astype(np.int16)
-        with wave.open(str(path), "wb") as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(engine.sample_rate)
-            wf.writeframes(arr_int16.tobytes())
-
-        return TTSResponse(
-            success=True,
-            audio_url=f"/api/audio/{audio_id}",
-            duration=round(duration, 2),
-        )
-
-    # Audio serving endpoint
-    @app.get("/api/audio/{audio_id}")
-    async def get_audio(audio_id: str):
-        from backend.storage.audio_store import AudioStore
-        path = app.state.audio_store.audio_dir / audio_id
-        if path.exists():
-            return FileResponse(str(path), media_type="audio/wav")
-        from fastapi.responses import JSONResponse
-        return JSONResponse({"detail": "not found"}, status_code=404)
-
-    app.state.engine = mock_engine
-    app.state.audio_store = mock_audio_store
-    return app
 
 
 @pytest.fixture
-def app(mock_engine, mock_audio_store):
-    return create_test_app(mock_engine, mock_audio_store)
-
-
-@pytest.fixture
-def client(app):
-    from httpx import AsyncClient, ASGITransport
-    transport = ASGITransport(app=app)
-    return AsyncClient(transport=transport, base_url="http://test")
+def client(async_client):
+    """Use the async_client from conftest (real app + mocked engine/store)."""
+    return async_client
 
 
 class TestTTSEndpoint:
@@ -116,17 +41,13 @@ class TestTTSEndpoint:
     async def test_tts_response_has_expected_fields(self, client):
         resp = await client.post("/api/tts/text-to-speech", json={"text": "hello"})
         data = resp.json()
-        assert "success" in data
-        assert "audio_url" in data
-        assert "duration" in data
-        assert "format" in data
-        assert "sample_rate" in data
+        for field in ("success", "audio_url", "duration", "format", "sample_rate"):
+            assert field in data, f"missing field: {field}"
 
     @pytest.mark.asyncio
     async def test_tts_with_instruction(self, client):
         resp = await client.post("/api/tts/text-to-speech", json={
-            "text": "今天是个好日子",
-            "instruction": "请用开心语气朗读",
+            "text": "今天是个好日子", "instruction": "请用开心语气朗读",
         })
         assert resp.status_code == 200
 

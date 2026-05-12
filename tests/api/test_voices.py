@@ -1,41 +1,13 @@
-"""API tests for voice management endpoints."""
+"""API tests for voice management endpoints — using real backend routes."""
 
 import json
 
 import pytest
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-
-from backend.models.schemas import VoiceListResponse, VoiceInfo
-
-
-def create_voices_test_app(mock_engine, mock_audio_store):
-    """Build a FastAPI app with voices routes wired to mocks."""
-    app = FastAPI()
-
-    @app.get("/api/voices", response_model=VoiceListResponse)
-    async def list_voices(request: Request):
-        store = request.app.state.audio_store
-        voices_data = store.list_voices()
-        return VoiceListResponse(
-            voices=[VoiceInfo(**v) for v in voices_data]
-        )
-
-    app.state.engine = mock_engine
-    app.state.audio_store = mock_audio_store
-    return app
 
 
 @pytest.fixture
-def app(mock_engine, mock_audio_store):
-    return create_voices_test_app(mock_engine, mock_audio_store)
-
-
-@pytest.fixture
-def client(app):
-    from httpx import AsyncClient, ASGITransport
-    transport = ASGITransport(app=app)
-    return AsyncClient(transport=transport, base_url="http://test")
+def client(async_client):
+    return async_client
 
 
 class TestVoicesEndpoint:
@@ -72,3 +44,21 @@ class TestVoicesEndpoint:
         voices = resp.json()["voices"]
         assert len(voices) == 1
         assert voices[0]["voice_id"] == "v_test"
+
+    @pytest.mark.asyncio
+    async def test_delete_voice_success(self, client, mock_audio_store):
+        # Pre-register a voice
+        vdir = mock_audio_store.voices_dir / "to_del"
+        vdir.mkdir(parents=True, exist_ok=True)
+        meta = {"voice_id": "to_del", "voice_name": "x", "created_at": "x", "duration": 1.0}
+        with open(vdir / "meta.json", "w") as f:
+            json.dump(meta, f)
+
+        resp = await client.delete("/api/voices/to_del")
+        assert resp.status_code == 200
+        assert resp.json()["success"] is True
+
+    @pytest.mark.asyncio
+    async def test_delete_nonexistent_voice_returns_404(self, client):
+        resp = await client.delete("/api/voices/nonexistent")
+        assert resp.status_code == 404
