@@ -1,0 +1,15 @@
+# ------------------------------------------------------------------
+# myTTS — development dependencies
+#
+# Install after the main requirements:
+#   pip install -r requirements-dev.txt
+# ------------------------------------------------------------------
+
+-r requirements.txt
+
+# --- Code quality ---
+ruff>=0.3
+mypy>=1.8
+
+# --- Frontend testing ---
+streamlit>=1.30,<2.0
