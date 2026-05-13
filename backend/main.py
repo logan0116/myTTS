@@ -8,12 +8,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from backend.config import settings
-from backend.engine.cosyvoice_engine import CosyVoiceEngine, ModelNotFoundError
-from backend.storage.audio_store import AudioStore
-from backend.api.tts import router as tts_router
-from backend.api.clone import router as clone_router
-from backend.api.voices import router as voices_router
+from config import settings
+from engine.cosyvoice_engine import CosyVoiceEngine, ModelNotFoundError
+from storage.audio_store import AudioStore
+from api.tts import router as tts_router
+from api.clone import router as clone_router
+from api.voices import router as voices_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -112,3 +112,4 @@ async def health():
         "status": "ok",
         "model_loaded": app.state.engine.is_loaded if hasattr(app.state, 'engine') else False,
     }
+

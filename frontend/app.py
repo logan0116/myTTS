@@ -11,7 +11,7 @@ import streamlit as st
 # Config
 # ---------------------------------------------------------------------------
 
-BACKEND_URL = st.secrets.get("backend_url", "http://127.0.0.1:8000")
+BACKEND_URL = "http://127.0.0.1:7723"
 API_TIMEOUT = 120
 
 st.set_page_config(
@@ -50,7 +50,7 @@ st.sidebar.caption(f"Backend: {BACKEND_URL}")
 # ---------------------------------------------------------------------------
 
 def api_post(endpoint: str, json_data: dict | None = None, files: dict | None = None, data: dict | None = None):
-    """Call FastAPI backend. Returns (ok, result)."""
+    """Call FastAPI  Returns (ok, result)."""
     url = f"{BACKEND_URL}{endpoint}"
     try:
         if files:
@@ -69,7 +69,7 @@ def api_post(endpoint: str, json_data: dict | None = None, files: dict | None = 
 
 
 def api_delete(endpoint: str):
-    """DELETE request to backend."""
+    """DELETE request to """
     url = f"{BACKEND_URL}{endpoint}"
     try:
         resp = requests.delete(url, timeout=10)
@@ -81,7 +81,7 @@ def api_delete(endpoint: str):
 
 
 def api_get(endpoint: str):
-    """GET request to backend."""
+    """GET request to """
     url = f"{BACKEND_URL}{endpoint}"
     try:
         resp = requests.get(url, timeout=30)

@@ -10,7 +10,7 @@ import numpy as np
 
 from fastapi import APIRouter, Request, UploadFile, File, Form, HTTPException
 
-from backend.models.schemas import SynthesizeCloneRequest, TTSResponse
+from models.schemas import SynthesizeCloneRequest, TTSResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/clone", tags=["clone"])

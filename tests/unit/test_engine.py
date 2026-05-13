@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from unittest.mock import MagicMock
 
-from backend.engine.cosyvoice_engine import CosyVoiceEngine
+from engine.cosyvoice_engine import CosyVoiceEngine
 from tests.conftest import generate_fake_audio_tensor
 
 

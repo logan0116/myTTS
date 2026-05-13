@@ -4,7 +4,7 @@ import logging
 
 from fastapi import APIRouter, Request, HTTPException
 
-from backend.models.schemas import TTSRequest, TTSResponse
+from models.schemas import TTSRequest, TTSResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tts", tags=["tts"])

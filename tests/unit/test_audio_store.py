@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from backend.storage.audio_store import AudioStore
+from storage.audio_store import AudioStore
 from tests.conftest import (
     generate_fake_audio_tensor,
     generate_wav_file,

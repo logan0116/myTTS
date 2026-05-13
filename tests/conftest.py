@@ -159,8 +159,8 @@ def fake_audio_bytes(fake_audio_tensor):
 @pytest.fixture
 def mock_engine(prompt_zh_wav):
     """Mock CosyVoiceEngine with fake but realistic behavior."""
-    from backend.engine.cosyvoice_engine import CosyVoiceEngine
-    from backend.engine.cosyvoice_engine import ModelNotFoundError
+    from engine.cosyvoice_engine import CosyVoiceEngine
+    from engine.cosyvoice_engine import ModelNotFoundError
 
     engine = CosyVoiceEngine(model_dir="/fake/model")
 
@@ -186,7 +186,7 @@ def mock_engine(prompt_zh_wav):
 @pytest.fixture
 def mock_audio_store(temp_storage_dir):
     """AudioStore backed by temporary directory."""
-    from backend.storage.audio_store import AudioStore
+    from storage.audio_store import AudioStore
     store = AudioStore(storage_dir=str(temp_storage_dir))
     return store
 
@@ -202,7 +202,7 @@ def app_with_mocks(mock_engine, mock_audio_store):
     Uses ASGI transport (no lifespan events fired), so the real model loader
     is never called.
     """
-    from backend.main import app
+    from main import app
 
     app.state.engine = mock_engine
     app.state.audio_store = mock_audio_store

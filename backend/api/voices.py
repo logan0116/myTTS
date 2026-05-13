@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Request, HTTPException
 
-from backend.models.schemas import VoiceListResponse, VoiceInfo
+from models.schemas import VoiceListResponse, VoiceInfo
 
 router = APIRouter(prefix="/api", tags=["voices"])
 
