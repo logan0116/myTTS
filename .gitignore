@@ -39,3 +39,10 @@ Thumbs.db
 
 # Conda
 *.tar.bz2
+
+# Generated test audio
+*.wav
+
+# CosyVoice source (cloned, too large)
+CosyVoice/
+cosyvoice3_0/
