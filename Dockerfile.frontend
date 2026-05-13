@@ -1,0 +1,37 @@
+# ------------------------------------------------------------------
+# myTTS Frontend — Streamlit web UI
+#
+# Build:
+#   docker build -t mytts-frontend -f Dockerfile.frontend .
+#
+# Run:
+#   docker run -p 8501:8501 \
+#     -e BACKEND_URL=http://backend:8000 \
+#     mytts-frontend
+# ------------------------------------------------------------------
+
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# ---- Python dependencies ----
+RUN pip install --no-cache-dir \
+    streamlit>=1.30,<2.0 \
+    requests>=2.31
+
+# ---- Application code ----
+COPY app.py .
+
+# ---- Runtime config ----
+ENV BACKEND_URL=http://tts-backend:8000
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "app.py", \
+     "--server.address=0.0.0.0", \
+     "--server.port=8501", \
+     "--server.headless=true", \
+     "--browser.gatherUsageStats=false"]
