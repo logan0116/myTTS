@@ -20,7 +20,6 @@ env/
 
 # Model files (too large for git)
 pretrained_models/
-models/
 cosyvoice3_0/
 
 # Audio storage
