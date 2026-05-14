@@ -1,6 +1,6 @@
 docker run \
   -d \
-  --restart always \ 
+  --restart always \
   --gpus "device=1" \
   --shm-size 32G \
   --name index_tts \
